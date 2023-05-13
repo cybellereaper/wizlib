@@ -25,4 +25,4 @@ For usage examples, refer to the [godoc](https://pkg.go.dev/github.com/6d6577/wi
 
 ## License
 
-WizLib is licensed under the Apache License 2.0. Refer to the [LICENSE](LICENSE) file for more information.
+WizLib is licensed under the MIT License. Refer to the [LICENSE](LICENSE) file for more information.
