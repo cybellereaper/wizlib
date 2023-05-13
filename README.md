@@ -5,7 +5,7 @@
 ## Features
 
 - Easy-to-use API
-- Multiple utilities, including deck sorter, gear sorter, and pet hatcher
+<!-- - Multiple utilities, including deck sorter, gear sorter, and pet hatcher -->
 - Simple integration process
 - Compatible with Go 1.16+
 
