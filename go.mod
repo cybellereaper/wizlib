@@ -1,4 +1,4 @@
-module github.com/6d6577/wizlib
+module github.com/6d6577/wizlib/v2
 
 go 1.20
 
