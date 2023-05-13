@@ -19,12 +19,12 @@ func bitsetDiv(att1, att2, att3 int64, offset float64) string {
 }
 
 type PetAttributes struct {
-	Strength     int64
-	Willpower    int64
-	Intelligence int64
-	Power        int64
-	Agility      int64
-	Happiness    int64
+	Strength     int64 `json:"strength"`
+	Willpower    int64 `json:"will"`
+	Intelligence int64 `json:"intelligence"`
+	Power        int64 `json:"power"`
+	Agility      int64 `json:"agility"`
+	Happiness    int64 `json:"happiness"`
 }
 
 func (pa *PetAttributes) Calculate() map[string]map[string]interface{} {
