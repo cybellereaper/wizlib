@@ -12,8 +12,8 @@ const (
 )
 
 type RaidMember struct {
-	RaidPosition string `bson:"raid_position"`
-	Backup       bool   `bson:"backup"`
+	RaidPosition string `json:"raid_position"`
+	Backup       bool   `json:"backup"`
 }
 
 func (r *RaidMember) IsBackup() bool {
@@ -21,8 +21,8 @@ func (r *RaidMember) IsBackup() bool {
 }
 
 type Raid struct {
-	GuildID string `bson:"guild_id"`
-	Gates   []Gate `bson:"gates"`
+	GuildID string `json:"guild_id"`
+	Gates   []Gate `json:"gates"`
 }
 
 func (r *Raid) GetGate(date string) *Gate {
@@ -52,9 +52,9 @@ func GetGate(raid *Raid, gateNum int) (*Gate, error) {
 }
 
 type Gate struct {
-	Status  int64                  `bson:"status"`
-	Date    string                 `bson:"date"`
-	Members map[string]*RaidMember `bson:"members"`
+	Status  int64                  `json:"status"`
+	Date    string                 `json:"date"`
+	Members map[string]*RaidMember `json:"members"`
 }
 
 func (g *Gate) GetMember(userID string) *RaidMember {
