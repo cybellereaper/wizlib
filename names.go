@@ -1,11 +1,16 @@
 package wizlib
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
+	"net/http"
 	"regexp"
 	"strings"
 )
+
+const defaultNamingListURL = "https://gist.githubusercontent.com/Astridalia/72fa9fb9699b4a9485cd5a17798cd161/raw/62a67360f88cecfc372c678dcf59c1a511cf0159/w101_names.json"
 
 type Name struct {
 	First  string
@@ -15,6 +20,27 @@ type Name struct {
 
 type AcceptedNames struct {
 	Names []string `json:"names"`
+}
+
+func GetDefaultNames() (AcceptedNames, error) {
+	resp, err := http.Get(defaultNamingListURL)
+	if err != nil {
+		return AcceptedNames{}, err
+	}
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return AcceptedNames{}, err
+	}
+
+	var names AcceptedNames
+	err = json.Unmarshal(body, &names)
+	if err != nil {
+		return AcceptedNames{}, err
+	}
+
+	return names, nil
 }
 
 func CreateName(input string, acceptedNames AcceptedNames) (string, error) {
