@@ -13,10 +13,16 @@ require (
 )
 
 
-retract v1.0.0
-retract v0.0.8
-retract v0.0.7
-retract v0.0.5
-retract v0.0.6
-retract v0.0.4
-retract v0.0.3
+
+retract (
+ v0.0.3
+ v1.0.0
+ v0.0.8
+ v0.0.7
+ v0.0.5
+ v0.0.6
+ v0.0.4
+)
+
+
+
