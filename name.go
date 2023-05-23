@@ -4,12 +4,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"net/http"
+	"os"
 	"regexp"
 	"strings"
 )
-
-const defaultNamingListURL = "https://gist.githubusercontent.com/Astridalia/72fa9fb9699b4a9485cd5a17798cd161/raw/62a67360f88cecfc372c678dcf59c1a511cf0159/w101_names.json"
 
 type Name struct {
 	First  string
@@ -27,8 +27,8 @@ type NameGenerator struct {
 }
 
 // NewNameGenerator creates a new instance of NameGenerator and retrieves the default accepted names from the provided URL.
-func NewNameGenerator() (*NameGenerator, error) {
-	names, err := getDefaultNames()
+func NewNameGenerator(repo NameRepository) (*NameGenerator, error) {
+	names, err := repo.GetNames()
 	if err != nil {
 		return nil, err
 	}
@@ -37,18 +37,66 @@ func NewNameGenerator() (*NameGenerator, error) {
 	}, nil
 }
 
-// getDefaultNames retrieves the default accepted names from the provided URL.
-func getDefaultNames() (AcceptedNames, error) {
-	resp, err := http.Get(defaultNamingListURL)
+// NameRepository defines the contract for accessing name data.
+type NameRepository interface {
+	GetNames() (AcceptedNames, error)
+}
+
+// JSONNameRepository is an implementation of the NameRepository using a JSON file.
+type JSONNameRepository struct {
+	FilePath string
+}
+
+// GetNames retrieves the accepted names from a JSON file.
+func (r *JSONNameRepository) GetNames() (AcceptedNames, error) {
+	file, err := os.Open(r.FilePath)
+	if err != nil {
+		return AcceptedNames{}, err
+	}
+	defer file.Close()
+
+	data, err := ioutil.ReadAll(file)
+	if err != nil {
+		return AcceptedNames{}, err
+	}
+
+	var names AcceptedNames
+	err = json.Unmarshal(data, &names)
+	if err != nil {
+		return AcceptedNames{}, err
+	}
+
+	return names, nil
+}
+
+// URLNameRepository is an implementation of the NameRepository using a remote URL.
+type URLNameRepository struct {
+	URL string
+}
+
+// GetNames retrieves the accepted names from a remote URL.
+func (r *URLNameRepository) GetNames() (AcceptedNames, error) {
+	resp, err := http.Get(r.URL)
 	if err != nil {
 		return AcceptedNames{}, err
 	}
 	defer resp.Body.Close()
-	var names AcceptedNames
-	err = json.NewDecoder(resp.Body).Decode(&names)
+
+	if resp.StatusCode != http.StatusOK {
+		return AcceptedNames{}, fmt.Errorf("request failed with status code: %d", resp.StatusCode)
+	}
+
+	data, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return AcceptedNames{}, err
 	}
+
+	var names AcceptedNames
+	err = json.Unmarshal(data, &names)
+	if err != nil {
+		return AcceptedNames{}, err
+	}
+
 	return names, nil
 }
 
