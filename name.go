@@ -28,13 +28,11 @@ func GetDefaultNames() (AcceptedNames, error) {
 		return AcceptedNames{}, err
 	}
 	defer resp.Body.Close()
-
 	var names AcceptedNames
 	err = json.NewDecoder(resp.Body).Decode(&names)
 	if err != nil {
 		return AcceptedNames{}, err
 	}
-
 	return names, nil
 }
 

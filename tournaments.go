@@ -18,15 +18,14 @@ type Tournament struct {
 
 // ExtractTimestamp extracts the timestamp from the given line using a regular expression.
 func ExtractTimestamp(line string) (string, error) {
-	re := regexp.MustCompile(`new Date\((\d+)\)`) // Regular expression to match "new Date(timestamp)"
+	re := regexp.MustCompile(`new Date\((\d+)\)`)
 
-	matches := re.FindStringSubmatch(line) // Find matches in the line
+	matches := re.FindStringSubmatch(line)
 	if len(matches) < 2 {
 		return "", fmt.Errorf("no timestamp found")
 	}
 
-	timestamp := matches[1]
-	return timestamp, nil
+	return matches[1], nil
 }
 
 // FetchHTML retrieves the HTML content from the specified URL and returns a *goquery.Document.
@@ -51,7 +50,7 @@ func FetchHTML(url string) (*goquery.Document, error) {
 
 // ParseTournaments extracts tournament information from the provided *goquery.Document.
 func ParseTournaments(doc *goquery.Document) ([]Tournament, error) {
-	tournaments := make([]Tournament, 0)
+	tournaments := []Tournament{}
 	doc.Find(".schedule table tbody tr").Each(func(i int, s *goquery.Selection) {
 		tournament := Tournament{
 			Name:      strings.TrimSpace(s.Find("td:nth-child(1)").Text()),
@@ -59,14 +58,11 @@ func ParseTournaments(doc *goquery.Document) ([]Tournament, error) {
 			StartTime: strings.TrimSpace(s.Find("td:nth-child(3)").Text()),
 			Duration:  strings.TrimSpace(s.Find("td:nth-child(4)").Text()),
 		}
-
 		if ts, err := ExtractTimestamp(tournament.StartTime); err == nil {
 			tournament.StartTime = ts
 		}
-
 		tournaments = append(tournaments, tournament)
 	})
-
 	return tournaments, nil
 }
 
@@ -76,13 +72,7 @@ func FetchTournaments() ([]Tournament, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	tournaments, err := ParseTournaments(doc)
-	if err != nil {
-		return nil, err
-	}
-
-	return tournaments, nil
+	return ParseTournaments(doc)
 }
 
 // PrintTournaments prints the information of the provided tournaments.
