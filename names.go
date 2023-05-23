@@ -22,6 +22,8 @@ type AcceptedNames struct {
 	Names []string `json:"names"`
 }
 
+// GetDefaultNames retrieves a list of accepted names from the defaultNamingListURL.
+// It returns the AcceptedNames struct containing the list of names and any error encountered.
 func GetDefaultNames() (AcceptedNames, error) {
 	resp, err := http.Get(defaultNamingListURL)
 	if err != nil {
