@@ -3,7 +3,6 @@
 "WizLib" is a Go module that provides a collection of utilities designed for the popular game "Wizard101". These tools can be used by anyone who plays the game, regardless of their experience level.
 
 ## Features
-<!-- - Multiple utilities, including deck sorter, gear sorter, and pet hatcher -->
 - Easy-to-use API
 - Simple integration process
 - Compatible with Go 1.16+
@@ -25,3 +24,5 @@ For usage examples, refer to the [godoc](https://pkg.go.dev/github.com/astridali
 ## License
 
 WizLib is licensed under the MIT License. Refer to the [LICENSE](LICENSE) file for more information.
+
+
