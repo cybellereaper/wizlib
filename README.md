@@ -9,7 +9,7 @@ WizLib is a Go package that provides utilities for working with wizard names and
 To use WizLib in your Go project, you can simply import it using Go modules:
 
 ```shell
-go get github.com/astridalia/wizlib@v0.0.7
+go get github.com/astridalia/wizlib@v1.0.0
 ```
 
 ## Features
