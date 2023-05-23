@@ -22,8 +22,7 @@ type AcceptedNames struct {
 	Names []string `json:"names"`
 }
 
-// GetDefaultNames retrieves a list of accepted names from the defaultNamingListURL.
-// It returns the AcceptedNames struct containing the list of names and any error encountered.
+// GetDefaultNames retrieves the default accepted names from the provided URL.
 func GetDefaultNames() (AcceptedNames, error) {
 	resp, err := http.Get(defaultNamingListURL)
 	if err != nil {
@@ -45,12 +44,11 @@ func GetDefaultNames() (AcceptedNames, error) {
 	return names, nil
 }
 
+// CreateName generates a valid name based on the input and the accepted names list.
 func CreateName(input string, acceptedNames AcceptedNames) (string, error) {
-	// Define a regular expression pattern to match the input name
 	pattern := fmt.Sprintf(`(?i)^(%s)( (%s))?((%s))?$`, strings.Join(acceptedNames.Names, "|"), strings.Join(acceptedNames.Names, "|"), strings.Join(acceptedNames.Names, "|"))
 	nameRegex := regexp.MustCompile(pattern)
 
-	// Parse the input name into a Name struct
 	nameParts := strings.Split(input, " ")
 	var name Name
 	switch len(nameParts) {
@@ -72,8 +70,8 @@ func CreateName(input string, acceptedNames AcceptedNames) (string, error) {
 	return "", errors.New("sorry, the name is not accepted")
 }
 
+// IsNameAccepted checks if a name is in the list of accepted names.
 func IsNameAccepted(name Name, acceptedNames []string) bool {
-	// Launch a goroutine to compare each name in the list of accepted names
 	for _, acceptedName := range acceptedNames {
 		if acceptedName == fmt.Sprintf("%s %s %s", name.First, name.Middle, name.Last) {
 			return true

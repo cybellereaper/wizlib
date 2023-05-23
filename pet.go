@@ -6,14 +6,17 @@ import (
 	"github.com/icza/gox/mathx"
 )
 
+// CompareFactors compares two factors and returns a result based on a formula.
 func CompareFactors(petOne, petTwo int64) int64 {
 	return (100 * (11 - petOne) / (22 - (petOne + petTwo)))
 }
 
+// bitsetTimes calculates a result based on bitwise operations and a multiplier.
 func bitsetTimes(att1, att2, att3 int64, offset float64) string {
 	return fmt.Sprintf("%.1f%%", mathx.Round(float64(att1<<1+att2<<1+att3)*offset, 0.1))
 }
 
+// bitsetDiv calculates a result based on bitwise operations and a divisor.
 func bitsetDiv(att1, att2, att3 int64, offset float64) string {
 	return fmt.Sprintf("%.1f%%", mathx.Round(float64(att1<<1+att2<<1+att3)/offset, 0.1))
 }
@@ -27,6 +30,7 @@ type PetAttributes struct {
 	Happiness    int64 `json:"happiness"`
 }
 
+// Calculate calculates various attributes based on pet attributes.
 func (pa *PetAttributes) Calculate() map[string]map[string]interface{} {
 	result := make(map[string]map[string]interface{})
 	result["damage"] = map[string]interface{}{
