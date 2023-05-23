@@ -3,6 +3,7 @@ package wizlib
 import (
 	"fmt"
 	"net/http"
+	"net/url"
 	"regexp"
 	"strings"
 
@@ -174,4 +175,78 @@ func (p *ConsolePresenter) PresentTournaments(tournaments []Tournament) {
 		fmt.Printf("Duration: %s\n", t.Duration)
 		fmt.Println("-----------------------------")
 	}
+}
+
+// URLParams contains the parameters for a URL.
+type URLParams struct {
+	Age    string
+	Levels string
+	Filter string
+}
+
+// URLParser is responsible for parsing URL parameters.
+type URLParser struct {
+	rawURL string
+}
+
+// NewURLParser creates a new instance of URLParser.
+func NewURLParser(rawURL string) *URLParser {
+	return &URLParser{
+		rawURL: rawURL,
+	}
+}
+
+// ParseURL parses the URL and extracts the relevant parameters.
+func (p *URLParser) ParseURL() (*URLParams, error) {
+	u, err := url.Parse(p.rawURL)
+	if err != nil {
+		return nil, err
+	}
+
+	age := u.Query().Get("age")
+	levels := u.Query().Get("levels")
+	filter := u.Query().Get("filter")
+
+	params := &URLParams{
+		Age:    age,
+		Levels: levels,
+		Filter: filter,
+	}
+
+	return params, nil
+}
+
+// URLGenerator is responsible for generating URLs with parameters.
+type URLGenerator struct {
+	baseURL string
+	params  *URLParams
+}
+
+// NewURLGenerator creates a new instance of URLGenerator.
+func NewURLGenerator(baseURL string) *URLGenerator {
+	return &URLGenerator{
+		baseURL: baseURL,
+	}
+}
+
+// WithParams sets the parameters for the URLGenerator.
+func (g *URLGenerator) WithParams(params *URLParams) *URLGenerator {
+	g.params = params
+	return g
+}
+
+// GenerateURL generates a URL with the provided parameters.
+func (g *URLGenerator) GenerateURL() (string, error) {
+	u, err := url.Parse(g.baseURL)
+	if err != nil {
+		return "", err
+	}
+
+	q := u.Query()
+	q.Set("age", g.params.Age)
+	q.Set("levels", g.params.Levels)
+	q.Set("filter", g.params.Filter)
+	u.RawQuery = q.Encode()
+
+	return u.String(), nil
 }
