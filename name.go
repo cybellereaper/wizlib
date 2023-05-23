@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"regexp"
 	"strings"
@@ -30,13 +29,8 @@ func GetDefaultNames() (AcceptedNames, error) {
 	}
 	defer resp.Body.Close()
 
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return AcceptedNames{}, err
-	}
-
 	var names AcceptedNames
-	err = json.Unmarshal(body, &names)
+	err = json.NewDecoder(resp.Body).Decode(&names)
 	if err != nil {
 		return AcceptedNames{}, err
 	}
