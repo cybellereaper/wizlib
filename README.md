@@ -1,28 +1,79 @@
 # WizLib
 
-"WizLib" is a Go module that provides a collection of utilities designed for the popular game "Wizard101". These tools can be used by anyone who plays the game, regardless of their experience level.
+[![Go Reference](https://pkg.go.dev/badge/github.com/astridalia/wizlib.svg)](https://pkg.go.dev/github.com/astridalia/wizlib)
 
-## Features
-- Easy-to-use API
-- Simple integration process
-- Compatible with Go 1.16+
+WizLib is a Go package that provides utilities for working with wizard names and game data in the magical world of Wizard101.
 
 ## Installation
 
-To use WizLib in your Go project, follow these steps:
+To use WizLib in your Go project, you can simply import it using Go modules:
 
-1. Ensure that you have [Go 1.16+](https://golang.org/dl/) installed on your system.
-2. In your project's root directory, run the following command: `go get github.com/astridalia/wizlib`
-3. Import the WizLib package into your project: `import "github.com/astridalia/wizlib"`
+```shell
+go get github.com/astridalia/wizlib@v0.0.8
+```
 
-That's it! You're now ready to use the WizLib utilities in your Go project.
+## Features
+
+- **Name Generation**: Generate valid wizard names based on an accepted names list.
+- **Game Data Retrieval**: Fetch player rankings and tournament information from the Wizard101 website.
+- **Clean Architecture**: Well-organized codebase following clean architecture principles.
 
 ## Usage
 
-For usage examples, refer to the [godoc](https://pkg.go.dev/github.com/astridalia/wizlib) documentation.
+### Name Generation
 
-## License
+```go
+package main
 
-WizLib is licensed under the MIT License. Refer to the [LICENSE](LICENSE) file for more information.
+import (
+	"fmt"
+	"github.com/astridalia/wizlib"
+)
 
+func main() {
+	nameGenerator := wizlib.NewNameGenerator()
+
+	name, err := nameGenerator.GenerateName("Merle Ambrose")
+	if err != nil {
+		fmt.Println("Failed to generate name:", err)
+		return
+	}
+
+	fmt.Println("Generated name:", name)
+}
+```
+
+### Game Data Retrieval
+
+```go
+package main
+
+import (
+	"fmt"
+	"github.com/astridalia/wizlib"
+)
+
+func main() {
+	rankingRepo := wizlib.NewRankingRepository("https://www.wizard101.com/pvp/pvp-rankings?age=4&levels=1-10&filter=storm")
+	tournamentRepo := wizlib.NewTournamentRepository("https://www.wizard101.com/pvp/tournament-rankings?age=4&levels=1-10&filter=death")
+
+	rankings, err := rankingRepo.FetchRankings()
+	if err != nil {
+		fmt.Println("Failed to fetch player rankings:", err)
+		return
+	}
+
+	tournaments, err := tournamentRepo.FetchTournaments()
+	if err != nil {
+		fmt.Println("Failed to fetch tournaments:", err)
+		return
+	}
+
+	presenter := wizlib.ConsolePresenter{}
+	presenter.PresentRankings(rankings)
+	presenter.PresentTournaments(tournaments)
+}
+```
+
+For detailed documentation, refer to the [**GoDoc**](https://pkg.go.dev/github.com/astridalia/wizlib).
 
