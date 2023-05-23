@@ -61,13 +61,3 @@ func CreateName(input string, acceptedNames AcceptedNames) (string, error) {
 
 	return "", errors.New("sorry, the name is not accepted")
 }
-
-// IsNameAccepted checks if a name is in the list of accepted names.
-func IsNameAccepted(name Name, acceptedNames []string) bool {
-	for _, acceptedName := range acceptedNames {
-		if acceptedName == fmt.Sprintf("%s %s %s", name.First, name.Middle, name.Last) {
-			return true
-		}
-	}
-	return false
-}
