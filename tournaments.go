@@ -16,8 +16,8 @@ type Tournament struct {
 	Duration  string `json:"duration"`
 }
 
-// ExtractTimestamp extracts the timestamp from the given line using a regular expression.
-func ExtractTimestamp(line string) (string, error) {
+// extractTimestamp extracts the timestamp from the given line using a regular expression.
+func extractTimestamp(line string) (string, error) {
 	re := regexp.MustCompile(`new Date\((\d+)\)`)
 
 	matches := re.FindStringSubmatch(line)
@@ -48,19 +48,22 @@ func FetchHTML(url string) (*goquery.Document, error) {
 	return doc, nil
 }
 
-// ParseTournaments extracts tournament information from the provided *goquery.Document.
-func ParseTournaments(doc *goquery.Document) ([]Tournament, error) {
-	tournaments := []Tournament{}
+func (t *Tournament) parseFromSelection(s *goquery.Selection) {
+	t.Name = strings.TrimSpace(s.Find("td:nth-child(1)").Text())
+	t.Levels = strings.TrimSpace(s.Find("td:nth-child(2)").Text())
+	t.StartTime = strings.TrimSpace(s.Find("td:nth-child(3)").Text())
+	t.Duration = strings.TrimSpace(s.Find("td:nth-child(4)").Text())
+	if timestamp, err := extractTimestamp(t.StartTime); err == nil {
+		t.StartTime = timestamp
+	}
+}
+
+// parseTournaments extracts tournament information from the provided *goquery.Document.
+func parseTournaments(doc *goquery.Document) ([]Tournament, error) {
+	tournaments := make([]Tournament, 0)
 	doc.Find(".schedule table tbody tr").Each(func(i int, s *goquery.Selection) {
-		tournament := Tournament{
-			Name:      strings.TrimSpace(s.Find("td:nth-child(1)").Text()),
-			Levels:    strings.TrimSpace(s.Find("td:nth-child(2)").Text()),
-			StartTime: strings.TrimSpace(s.Find("td:nth-child(3)").Text()),
-			Duration:  strings.TrimSpace(s.Find("td:nth-child(4)").Text()),
-		}
-		if ts, err := ExtractTimestamp(tournament.StartTime); err == nil {
-			tournament.StartTime = ts
-		}
+		tournament := Tournament{}
+		tournament.parseFromSelection(s)
 		tournaments = append(tournaments, tournament)
 	})
 	return tournaments, nil
@@ -72,7 +75,7 @@ func FetchTournaments() ([]Tournament, error) {
 	if err != nil {
 		return nil, err
 	}
-	return ParseTournaments(doc)
+	return parseTournaments(doc)
 }
 
 // PrintTournaments prints the information of the provided tournaments.

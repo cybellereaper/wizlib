@@ -30,10 +30,10 @@ func FetchRankings(url string) ([]PlayerRanking, error) {
 	if err != nil {
 		return nil, err
 	}
-	return ParseRankings(doc), nil
+	return parseRankings(doc), nil
 }
 
-func ParseRankings(doc *goquery.Document) []PlayerRanking {
+func parseRankings(doc *goquery.Document) []PlayerRanking {
 	rankings := make([]PlayerRanking, 0)
 	doc.Find(".schedule table tbody tr").Each(func(i int, s *goquery.Selection) {
 		ranking := PlayerRanking{}
