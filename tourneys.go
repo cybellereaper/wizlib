@@ -16,22 +16,20 @@ type Tournament struct {
 	Duration  string `json:"duration"`
 }
 
-// ExtractTimestamp extracts the timestamp from a line of text using a regular expression.
-// It returns the extracted timestamp and any error encountered.
+// ExtractTimestamp extracts the timestamp from the given line using a regular expression.
 func ExtractTimestamp(line string) (string, error) {
-	re := regexp.MustCompile(`new Date\((\d+)\)`) // Regular expression to match the timestamp
+	re := regexp.MustCompile(`new Date\((\d+)\)`) // Regular expression to match "new Date(timestamp)"
 
-	matches := re.FindStringSubmatch(line) // Find the matches using the regular expression
+	matches := re.FindStringSubmatch(line) // Find matches in the line
 	if len(matches) < 2 {
 		return "", fmt.Errorf("no timestamp found")
 	}
 
-	timestamp := matches[1] // Extract the timestamp value from the matches
+	timestamp := matches[1]
 	return timestamp, nil
 }
 
-// FetchHTML fetches the HTML content of a webpage using the provided URL.
-// It returns the parsed goquery.Document and any error encountered.
+// FetchHTML retrieves the HTML content from the specified URL and returns a *goquery.Document.
 func FetchHTML(url string) (*goquery.Document, error) {
 	resp, err := http.Get(url)
 	if err != nil {
@@ -51,8 +49,7 @@ func FetchHTML(url string) (*goquery.Document, error) {
 	return doc, nil
 }
 
-// ParseTournaments parses the goquery.Document and extracts the tournament information.
-// It returns a slice of Tournament structs and any error encountered.
+// ParseTournaments extracts tournament information from the provided *goquery.Document.
 func ParseTournaments(doc *goquery.Document) ([]Tournament, error) {
 	tournaments := make([]Tournament, 0)
 	doc.Find(".schedule table tbody tr").Each(func(i int, s *goquery.Selection) {
@@ -73,8 +70,7 @@ func ParseTournaments(doc *goquery.Document) ([]Tournament, error) {
 	return tournaments, nil
 }
 
-// FetchTournaments fetches the tournaments from the specified URL and returns them.
-// It returns a slice of Tournament structs and any error encountered.
+// FetchTournaments retrieves the tournaments from the PvP schedule page and returns them as a slice of Tournament.
 func FetchTournaments() ([]Tournament, error) {
 	doc, err := FetchHTML("https://www.wizard101.com/pvp/schedule")
 	if err != nil {
@@ -89,7 +85,7 @@ func FetchTournaments() ([]Tournament, error) {
 	return tournaments, nil
 }
 
-// PrintTournaments prints the details of the provided tournaments.
+// PrintTournaments prints the information of the provided tournaments.
 func PrintTournaments(tournaments []Tournament) {
 	for _, t := range tournaments {
 		fmt.Printf("Tournament Name: %s\n", t.Name)
