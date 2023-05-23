@@ -28,8 +28,8 @@ func extractTimestamp(line string) (string, error) {
 	return matches[1], nil
 }
 
-// FetchHTML retrieves the HTML content from the specified URL and returns a *goquery.Document.
-func FetchHTML(url string) (*goquery.Document, error) {
+// fetchHTML retrieves the HTML content from the specified URL and returns a *goquery.Document.
+func fetchHTML(url string) (*goquery.Document, error) {
 	resp, err := http.Get(url)
 	if err != nil {
 		return nil, err
@@ -71,7 +71,7 @@ func parseTournaments(doc *goquery.Document) ([]Tournament, error) {
 
 // FetchTournaments retrieves the tournaments from the PvP schedule page and returns them as a slice of Tournament.
 func FetchTournaments() ([]Tournament, error) {
-	doc, err := FetchHTML("https://www.wizard101.com/pvp/schedule")
+	doc, err := fetchHTML("https://www.wizard101.com/pvp/schedule")
 	if err != nil {
 		return nil, err
 	}

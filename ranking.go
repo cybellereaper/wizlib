@@ -31,7 +31,7 @@ func (r *PlayerRanking) parseFromSelection(s *goquery.Selection) {
 // FetchRankings retrieves the player rankings from the specified URL.
 func FetchRankings(url string) ([]PlayerRanking, error) {
 	// Fetch the HTML content from the URL
-	doc, err := FetchHTML(url)
+	doc, err := fetchHTML(url)
 	if err != nil {
 		return nil, err
 	}
