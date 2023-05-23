@@ -19,18 +19,35 @@ type KioskItem struct {
 	LastUpdated int64  `json:"last_updated"`
 }
 
-// Add adds a new item to the kiosk.
-func (k *Kiosk) Add(name, itemType string, item KioskItem) {
-	k.LastUpdated = time.Now().Unix()
+// KioskManager provides methods for managing the kiosk and its items.
+type KioskManager struct {
+	kiosk *Kiosk
+}
+
+// NewKioskManager creates a new instance of KioskManager with an empty kiosk.
+func NewKioskManager(id, title string) *KioskManager {
+	return &KioskManager{
+		kiosk: &Kiosk{
+			Id:          id,
+			Title:       title,
+			KioskItems:  make(map[string]map[string]KioskItem),
+			LastUpdated: time.Now().Unix(),
+		},
+	}
+}
+
+// AddItem adds a new item to the kiosk.
+func (km *KioskManager) AddItem(name, itemType string, item KioskItem) {
+	km.kiosk.LastUpdated = time.Now().Unix()
 
 	// Check if the item type already exists in the kiosk.
-	if k.KioskItems[itemType] == nil {
+	if km.kiosk.KioskItems[itemType] == nil {
 		// If not, create a new map for that item type.
-		k.KioskItems[itemType] = make(map[string]KioskItem)
+		km.kiosk.KioskItems[itemType] = make(map[string]KioskItem)
 	}
 
 	// Check if the item with the given name already exists for the item type.
-	if _, ok := k.KioskItems[itemType][name]; !ok {
+	if _, ok := km.kiosk.KioskItems[itemType][name]; !ok {
 		// If not, set the stock to a default value of 1 if it's less than or equal to 0.
 		if item.Stock <= 0 {
 			item.Stock = 1
@@ -38,13 +55,13 @@ func (k *Kiosk) Add(name, itemType string, item KioskItem) {
 	}
 
 	// Add or update the item in the kiosk.
-	k.KioskItems[itemType][name] = item
+	km.kiosk.KioskItems[itemType][name] = item
 }
 
-// Select retrieves an item from the kiosk based on its name.
-func (k *Kiosk) Select(name string) (KioskItem, error) {
+// GetItem retrieves an item from the kiosk based on its name.
+func (km *KioskManager) GetItem(name string) (KioskItem, error) {
 	// Iterate over each item type in the kiosk.
-	for _, items := range k.KioskItems {
+	for _, items := range km.kiosk.KioskItems {
 		// Check if the item with the given name exists for any item type.
 		if item, ok := items[name]; ok {
 			// If found, return the item.
@@ -56,21 +73,35 @@ func (k *Kiosk) Select(name string) (KioskItem, error) {
 	return KioskItem{}, errors.New("item not found")
 }
 
-// Remove removes an item from the kiosk based on its name and item type.
-func (k *Kiosk) Remove(name, itemType string) error {
+// RemoveItem removes an item from the kiosk based on its name and item type.
+func (km *KioskManager) RemoveItem(name, itemType string) error {
 	// Check if the item type exists in the kiosk.
-	if items, ok := k.KioskItems[itemType]; ok {
+	if items, ok := km.kiosk.KioskItems[itemType]; ok {
 		// Check if the item with the given name exists for the item type.
 		delete(items, name)
 
 		// If there are no more items for the item type, remove the item type from the kiosk.
 		if len(items) == 0 {
-			delete(k.KioskItems, itemType)
+			delete(km.kiosk.KioskItems, itemType)
 		}
 
+		km.kiosk.LastUpdated = time.Now().Unix()
 		return nil
 	}
 
 	// If the item is not found, return an error.
 	return errors.New("item not found")
+}
+
+// GetLastUpdated returns the last updated timestamp of the kiosk.
+func (km *KioskManager) GetLastUpdated() int64 {
+	return km.kiosk.LastUpdated
+}
+
+// GetKiosk returns a copy of the kiosk.
+func (km *KioskManager) GetKiosk() Kiosk {
+	// Create a deep copy of the kiosk to prevent direct modifications.
+	// This ensures that modifications can only be made through the KioskManager methods.
+	kioskCopy := *km.kiosk
+	return kioskCopy
 }

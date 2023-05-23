@@ -21,8 +21,24 @@ type AcceptedNames struct {
 	Names []string `json:"names"`
 }
 
-// GetDefaultNames retrieves the default accepted names from the provided URL.
-func GetDefaultNames() (AcceptedNames, error) {
+// NameGenerator provides methods for generating valid names based on the input and the accepted names list.
+type NameGenerator struct {
+	acceptedNames AcceptedNames
+}
+
+// NewNameGenerator creates a new instance of NameGenerator and retrieves the default accepted names from the provided URL.
+func NewNameGenerator() (*NameGenerator, error) {
+	names, err := getDefaultNames()
+	if err != nil {
+		return nil, err
+	}
+	return &NameGenerator{
+		acceptedNames: names,
+	}, nil
+}
+
+// getDefaultNames retrieves the default accepted names from the provided URL.
+func getDefaultNames() (AcceptedNames, error) {
 	resp, err := http.Get(defaultNamingListURL)
 	if err != nil {
 		return AcceptedNames{}, err
@@ -36,9 +52,9 @@ func GetDefaultNames() (AcceptedNames, error) {
 	return names, nil
 }
 
-// CreateName generates a valid name based on the input and the accepted names list.
-func CreateName(input string, acceptedNames AcceptedNames) (string, error) {
-	pattern := fmt.Sprintf(`(?i)^(%s)( (%s))?((%s))?$`, strings.Join(acceptedNames.Names, "|"), strings.Join(acceptedNames.Names, "|"), strings.Join(acceptedNames.Names, "|"))
+// GenerateName generates a valid name based on the input and the accepted names list.
+func (g *NameGenerator) GenerateName(input string) (string, error) {
+	pattern := fmt.Sprintf(`(?i)^(%s)( (%s))?((%s))?$`, strings.Join(g.acceptedNames.Names, "|"), strings.Join(g.acceptedNames.Names, "|"), strings.Join(g.acceptedNames.Names, "|"))
 	nameRegex := regexp.MustCompile(pattern)
 
 	nameParts := strings.Split(input, " ")

@@ -6,11 +6,7 @@ import (
 	"time"
 )
 
-const (
-	timeFormat = "01/02/2006 03:04:05 PM MST"
-	timeDesc   = "Set a time and date format: " + timeFormat
-)
-
+// RaidMember represents a member of a raid.
 type RaidMember struct {
 	RaidPosition string `json:"raid_position"`
 	Backup       bool   `json:"backup"`
@@ -21,6 +17,35 @@ func (r *RaidMember) IsBackup() bool {
 	return r.Backup
 }
 
+// RaidRepository provides methods for accessing raid data.
+type RaidRepository interface {
+	GetRaid(guildID string) (*Raid, error)
+	SaveRaid(raid *Raid) error
+}
+
+// RaidService provides methods for performing raid-related operations.
+type RaidService struct {
+	repository RaidRepository
+}
+
+// NewRaidService creates a new instance of RaidService.
+func NewRaidService(repository RaidRepository) *RaidService {
+	return &RaidService{
+		repository: repository,
+	}
+}
+
+// GetRaid retrieves a raid by guild ID.
+func (s *RaidService) GetRaid(guildID string) (*Raid, error) {
+	return s.repository.GetRaid(guildID)
+}
+
+// SaveRaid saves a raid.
+func (s *RaidService) SaveRaid(raid *Raid) error {
+	return s.repository.SaveRaid(raid)
+}
+
+// Raid represents a raid with multiple gates.
 type Raid struct {
 	GuildID string `json:"guild_id"`
 	Gates   []Gate `json:"gates"`
@@ -55,6 +80,7 @@ func GetGate(raid *Raid, gateNum int) (*Gate, error) {
 	return &raid.Gates[gateIndex], nil
 }
 
+// Gate represents a gate in a raid.
 type Gate struct {
 	Status  int64                  `json:"status"`
 	Date    string                 `json:"date"`
@@ -80,11 +106,45 @@ func (g *Gate) RemoveMember(userID string) {
 	delete(g.Members, userID)
 }
 
-// TimeLayout converts a time string to UNIX timestamp format.
-func TimeLayout(tim string) (string, error) {
-	parsedTime, err := time.Parse(timeFormat, tim)
+// TimeFormatter provides methods for formatting time.
+type TimeFormatter interface {
+	ParseTime(timeString string) (string, error)
+}
+
+// DefaultTimeFormatter is a default implementation of TimeFormatter.
+type DefaultTimeFormatter struct {
+	layout string
+}
+
+// NewDefaultTimeFormatter creates a new instance of DefaultTimeFormatter.
+func NewDefaultTimeFormatter(layout string) *DefaultTimeFormatter {
+	return &DefaultTimeFormatter{
+		layout: layout,
+	}
+}
+
+// ParseTime parses a time string into the desired format.
+func (f *DefaultTimeFormatter) ParseTime(timeString string) (string, error) {
+	parsedTime, err := time.Parse(f.layout, timeString)
 	if err != nil {
-		return "", fmt.Errorf("invalid time format: %s", timeFormat)
+		return "", fmt.Errorf("invalid time format: %s", f.layout)
 	}
 	return strconv.FormatInt(parsedTime.Unix(), 10), nil
+}
+
+// TimeService provides methods for working with time.
+type TimeService struct {
+	formatter TimeFormatter
+}
+
+// NewTimeService creates a new instance of TimeService.
+func NewTimeService(formatter TimeFormatter) *TimeService {
+	return &TimeService{
+		formatter: formatter,
+	}
+}
+
+// ParseTime parses a time string into the desired format.
+func (s *TimeService) ParseTime(timeString string) (string, error) {
+	return s.formatter.ParseTime(timeString)
 }
