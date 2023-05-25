@@ -1,7 +1,6 @@
 package wizlib
 
 import (
-	"encoding/json"
 	"regexp"
 	"strconv"
 	"strings"
@@ -30,13 +29,26 @@ type PetInfo struct {
 	FishChestLoc   []string `json:"fishChestLocations,omitempty"`
 }
 
-func ConvertToJson(inter interface{}) (string, error) {
-	jsonData, err := json.MarshalIndent(inter, "", "  ")
-	if err != nil {
-		return "", nil
-	}
-	return string(jsonData), nil
+func ParseItemInfobox(template string) map[string]string {
+	result := make(map[string]string)
 
+	lines := strings.Split(template, "\n")
+	for _, line := range lines {
+		line = strings.TrimSpace(line)
+		if strings.HasPrefix(line, "|") {
+			parts := strings.SplitN(line[1:], "=", 2)
+			if len(parts) == 2 {
+				key := strings.TrimSpace(parts[0])
+				value := strings.TrimSpace(parts[1])
+
+				if value != "" {
+					result[key] = value
+				}
+			}
+		}
+	}
+
+	return result
 }
 
 func ParsePetInfo(infoBox string) PetInfo {
