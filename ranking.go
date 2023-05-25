@@ -123,12 +123,33 @@ func (r *PlayerRanking) parseFromSelection(s *goquery.Selection) {
 
 // parseFromSelection extracts the tournament information from a goquery.Selection.
 func (t *Tournament) parseFromSelection(s *goquery.Selection) {
-	t.Name = strings.TrimSpace(s.Find("td:nth-child(1)").Text())
+	t.Name = parseName(strings.TrimSpace(s.Find("td:nth-child(1)").Text()))
 	t.Levels = strings.TrimSpace(s.Find("td:nth-child(2)").Text())
 	t.StartTime = strings.TrimSpace(s.Find("td:nth-child(3)").Text())
 	t.Duration = strings.TrimSpace(s.Find("td:nth-child(4)").Text())
 	if timestamp, err := extractTimestamp(t.StartTime); err == nil {
 		t.StartTime = timestamp
+	}
+}
+
+func parseName(name string) string {
+	switch name {
+	case "LightningName":
+		return "Quick Match Tournament"
+	case "FireAndIceName":
+		return "Fire & Ice Perk Tournament"
+	case "OldSchoolName":
+		return "Classic Tournament"
+	case "AlternatingTurns_PipsAtOnceName":
+		return "Turn-Based Tournament"
+	case "MythAndStormName":
+		return "Myth & Storm Perk Tournament"
+	case "LifeAndDeathName":
+		return "Life & Death Perk Tournament"
+	case "BalanceName":
+		return "Balance Perk Tournament"
+	default:
+		return name
 	}
 }
 
