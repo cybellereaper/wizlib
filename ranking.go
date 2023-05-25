@@ -222,21 +222,16 @@ func NewURLParser(rawURL string) *URLParser {
 // ParseURL parses the URL and extracts the relevant parameters.
 func (p *URLParser) ParseURL() (*URLParams, error) {
 	u, err := url.Parse(p.rawURL)
+
 	if err != nil {
 		return nil, err
 	}
 
-	age := u.Query().Get("age")
-	levels := u.Query().Get("levels")
-	filter := u.Query().Get("filter")
-
-	params := &URLParams{
-		Age:    age,
-		Levels: levels,
-		Filter: filter,
-	}
-
-	return params, nil
+	return &URLParams{
+		Age:    u.Query().Get("age"),
+		Levels: u.Query().Get("levels"),
+		Filter: u.Query().Get("filter"),
+	}, nil
 }
 
 // URLGenerator is responsible for generating URLs with parameters.
@@ -261,6 +256,7 @@ func (g *URLGenerator) WithParams(params *URLParams) *URLGenerator {
 // GenerateURL generates a URL with the provided parameters.
 func (g *URLGenerator) GenerateURL() (string, error) {
 	u, err := url.Parse(g.baseURL)
+
 	if err != nil {
 		return "", err
 	}
@@ -270,6 +266,5 @@ func (g *URLGenerator) GenerateURL() (string, error) {
 	q.Set("levels", g.params.Levels)
 	q.Set("filter", g.params.Filter)
 	u.RawQuery = q.Encode()
-
 	return u.String(), nil
 }
