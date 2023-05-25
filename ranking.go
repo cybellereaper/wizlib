@@ -132,6 +132,8 @@ func (t *Tournament) parseFromSelection(s *goquery.Selection) {
 	}
 }
 
+// make an optimized parser
+
 func parseName(name string) string {
 	switch name {
 	case "LightningName":
