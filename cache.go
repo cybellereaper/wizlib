@@ -104,7 +104,6 @@ func (c *CacheRaidRepository) SaveRaid(raid *Raid) error {
 type KioskCache struct {
 	Manager *KioskManager
 	Cache   *Cache
-	mu      sync.RWMutex
 }
 
 // NewKioskCache creates a new instance of KioskCache.
@@ -117,8 +116,8 @@ func NewKioskCache(manager *KioskManager, duration time.Duration) *KioskCache {
 
 // AddItem adds a new item to the kiosk and updates the cache accordingly.
 func (kc *KioskCache) AddItem(name, itemType string, item KioskItem) {
-	kc.mu.Lock()
-	defer kc.mu.Unlock()
+	kc.Cache.mu.Lock()
+	defer kc.Cache.mu.Unlock()
 
 	kc.Manager.AddItem(name, itemType, item)
 	kc.Cache.Set(kc.Manager.GetKiosk(), time.Now().Add(kc.Cache.duration))
@@ -128,8 +127,8 @@ func (kc *KioskCache) AddItem(name, itemType string, item KioskItem) {
 // It first checks the cache and returns the item if found.
 // If not found in the cache, it retrieves the item from the underlying KioskManager and updates the cache.
 func (kc *KioskCache) GetItem(name string) (KioskItem, error) {
-	kc.mu.RLock()
-	defer kc.mu.RUnlock()
+	kc.Cache.mu.RLock()
+	defer kc.Cache.mu.RUnlock()
 
 	if data, ok := kc.Cache.Get(); ok {
 		if kiosk, ok := data.(Kiosk); ok {
@@ -154,8 +153,8 @@ func (kc *KioskCache) GetItem(name string) (KioskItem, error) {
 // RemoveItem removes an item from the kiosk based on its name and item type.
 // It updates the cache after removing the item.
 func (kc *KioskCache) RemoveItem(name, itemType string) error {
-	kc.mu.Lock()
-	defer kc.mu.Unlock()
+	kc.Cache.mu.Lock()
+	defer kc.Cache.mu.Unlock()
 
 	err := kc.Manager.RemoveItem(name, itemType)
 	if err != nil {
@@ -169,8 +168,8 @@ func (kc *KioskCache) RemoveItem(name, itemType string) error {
 
 // GetLastUpdated returns the last updated timestamp of the kiosk.
 func (kc *KioskCache) GetLastUpdated() int64 {
-	kc.mu.RLock()
-	defer kc.mu.RUnlock()
+	kc.Cache.mu.RLock()
+	defer kc.Cache.mu.RUnlock()
 
 	if data, ok := kc.Cache.Get(); ok {
 		if kiosk, ok := data.(Kiosk); ok {
@@ -184,8 +183,8 @@ func (kc *KioskCache) GetLastUpdated() int64 {
 // GetKiosk returns a copy of the kiosk from the cache.
 // If the cache is empty, it retrieves the kiosk from the underlying KioskManager and updates the cache.
 func (kc *KioskCache) GetKiosk() (Kiosk, error) {
-	kc.mu.RLock()
-	defer kc.mu.RUnlock()
+	kc.Cache.mu.RLock()
+	defer kc.Cache.mu.RUnlock()
 
 	if data, ok := kc.Cache.Get(); ok {
 		if kiosk, ok := data.(Kiosk); ok {
