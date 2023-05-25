@@ -29,7 +29,7 @@ type PetInfo struct {
 	FishChestLoc   []string `json:"fishChestLocations,omitempty"`
 }
 
-func ParseItemInfobox(template string) map[string]string {
+func ParseInfobox(template string) map[string]string {
 	result := make(map[string]string)
 
 	lines := strings.Split(template, "\n")
@@ -51,7 +51,7 @@ func ParseItemInfobox(template string) map[string]string {
 	return result
 }
 
-func ParsePetInfo(infoBox string) PetInfo {
+func parsePet(infoBox string) PetInfo {
 	petInfo := PetInfo{}
 	r := regexp.MustCompile(`\| (.*?) = (.*?)(?:\n|$)`)
 	matches := r.FindAllStringSubmatch(infoBox, -1)

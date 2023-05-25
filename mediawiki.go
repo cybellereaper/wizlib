@@ -1,12 +1,11 @@
 package wizlib
 
 import (
-	"bufio"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
-	"strings"
 
 	cloudflarebp "github.com/DaRealFreak/cloudflare-bp-go"
 )
@@ -39,7 +38,7 @@ func NewAPIClient() *APIClient {
 }
 
 func (c *APIClient) Get(url string) ([]byte, error) {
-
+	log.Print("Fetching: ", url)
 	http := &http.Client{}
 	http.Transport = cloudflarebp.AddCloudFlareByPass(http.Transport)
 
@@ -78,31 +77,5 @@ func (s *WikiService) GetWikiText(pageID string) (interface{}, error) {
 	if err := json.Unmarshal(body, &api); err != nil {
 		return make(map[string]string, 0), err
 	}
-	if strings.Contains(url, "Pet:") {
-		return ParsePetInfo(api.Parse.WikiText.Content), nil
-	}
-	return parseInfobox(api.Parse.WikiText.Content), nil
-}
-
-func parseInfobox(template string) map[string]string {
-	result := make(map[string]string)
-	scanner := bufio.NewScanner(strings.NewReader(template))
-	for scanner.Scan() {
-		line := strings.TrimSpace(scanner.Text())
-		if strings.HasPrefix(line, "|") {
-			parts := strings.SplitN(line[1:], "=", 2)
-			if len(parts) == 2 {
-				key := strings.TrimSpace(parts[0])
-				value := strings.TrimSpace(parts[1])
-
-				if value != "" {
-					result[key] = value
-				}
-			}
-		}
-	}
-	if err := scanner.Err(); err != nil {
-		panic(err)
-	}
-	return result
+	return api.Parse.WikiText.Content, nil
 }

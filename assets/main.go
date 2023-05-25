@@ -8,7 +8,7 @@ import (
 
 func main() {
 	service := wizlib.NewWikiService()
-	content, err := service.GetWikiText("Pet:Bloodbat")
+	content, err := service.GetWikiText("Item:4th_Age_Balance_Talisman")
 	if err != nil {
 		fmt.Println("Failed to fetch wiki text:", err)
 		return
