@@ -14,14 +14,14 @@ go get github.com/astridalia/wizlib@v1.0.3
 
 ## Features
 
-- **Wizard101Central/Mediawiki**: Get information from the wiki.
+- **Mediawiki**: Get information from the wiki.
 - **Name Generation**: Generate valid wizard names based on an accepted names list.
 - **Game Data Retrieval**: Fetch player rankings and tournament information from the Wizard101 website.
 - **Clean Architecture**: Well-organized codebase following clean architecture principles.
 
 ## Usage
 
-### Wizard101Central/Mediawiki Retrieval
+### Mediawiki Retrieval
 
 ```go
 package main
