@@ -105,7 +105,16 @@ func (g *NameGenerator) GenerateName(input string) (string, error) {
 	}
 
 	if nameRegex.MatchString(input) {
-		return fmt.Sprintf("%s %s%s", name.First, name.Middle, name.Last), nil
+		var sb strings.Builder
+		sb.WriteString(name.First)
+		if name.Middle != "" {
+			sb.WriteString(" ")
+			sb.WriteString(name.Middle)
+		}
+		if name.Last != "" {
+			sb.WriteString(name.Last)
+		}
+		return sb.String(), nil
 	}
 
 	return "", errors.New("sorry, the name is not accepted")

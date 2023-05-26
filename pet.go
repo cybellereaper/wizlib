@@ -2,8 +2,7 @@ package wizlib
 
 import (
 	"fmt"
-
-	"github.com/icza/gox/mathx"
+	"math"
 )
 
 type PetAttributes struct {
@@ -16,8 +15,7 @@ type PetAttributes struct {
 }
 
 // PetCalculator provides methods for calculating various attributes based on pet attributes.
-type PetCalculator struct {
-}
+type PetCalculator struct{}
 
 // NewPetCalculator creates a new instance of PetCalculator.
 func NewPetCalculator() *PetCalculator {
@@ -71,12 +69,12 @@ func (c *PetCalculator) Calculate(pa *PetAttributes) map[string]map[string]inter
 
 // bitsetTimes calculates a result based on bitwise operations and a multiplier.
 func (c *PetCalculator) bitsetTimes(att1, att2, att3 int64, offset float64) string {
-	return fmt.Sprintf("%.1f%%", mathx.Round(float64(att1<<1+att2<<1+att3)*offset, 0.1))
+	return fmt.Sprintf("%.1f%%", math.Round(float64((att1<<1)+(att2<<1)+(att3<<1))*offset*10)/10)
 }
 
 // bitsetDiv calculates a result based on bitwise operations and a divisor.
 func (c *PetCalculator) bitsetDiv(att1, att2, att3 int64, offset float64) string {
-	return fmt.Sprintf("%.1f%%", mathx.Round(float64(att1<<1+att2<<1+att3)/offset, 0.1))
+	return fmt.Sprintf("%.1f%%", math.Round(float64((att1<<1)+(att2<<1)+(att3<<1))/offset*10)/10)
 }
 
 // CompareFactors compares two factors and returns a result based on a formula.

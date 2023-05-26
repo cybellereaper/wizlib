@@ -137,27 +137,22 @@ func (t *Tournament) parseFromSelection(s *goquery.Selection) {
 	}
 }
 
-// make an optimized parser
+var nameMap = map[string]string{
+	"LightningName":                   "Quick Match Tournament",
+	"FireAndIceName":                  "Fire & Ice Perk Tournament",
+	"OldSchoolName":                   "Classic Tournament",
+	"AlternatingTurns_PipsAtOnceName": "Turn-Based Tournament",
+	"MythAndStormName":                "Myth & Storm Perk Tournament",
+	"LifeAndDeathName":                "Life & Death Perk Tournament",
+	"BalanceName":                     "Balance Perk Tournament",
+}
 
+// parseName parses the name of a tournament.
 func parseName(name string) string {
-	switch name {
-	case "LightningName":
-		return "Quick Match Tournament"
-	case "FireAndIceName":
-		return "Fire & Ice Perk Tournament"
-	case "OldSchoolName":
-		return "Classic Tournament"
-	case "AlternatingTurns_PipsAtOnceName":
-		return "Turn-Based Tournament"
-	case "MythAndStormName":
-		return "Myth & Storm Perk Tournament"
-	case "LifeAndDeathName":
-		return "Life & Death Perk Tournament"
-	case "BalanceName":
-		return "Balance Perk Tournament"
-	default:
-		return name
+	if val, ok := nameMap[name]; ok {
+		return val
 	}
+	return name
 }
 
 // extractTimestamp extracts the timestamp from the given line using a regular expression.
