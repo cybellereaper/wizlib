@@ -4,9 +4,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
+	"time"
 
 	cloudflarebp "github.com/DaRealFreak/cloudflare-bp-go"
 )
@@ -26,37 +27,57 @@ const (
 	apiURL = "https://www.wizard101central.com/wiki/api.php"
 )
 
+// APIClient provides methods for making HTTP requests.
 type APIClient struct {
 	Client *http.Client
 }
 
+// NewAPIClient creates a new instance of APIClient.
 func NewAPIClient() *APIClient {
-	client := &http.Client{}
+	client := &http.Client{
+		Timeout: 10 * time.Second,
+	}
 	client.Transport = cloudflarebp.AddCloudFlareByPass(client.Transport)
 	return &APIClient{
 		Client: client,
 	}
 }
 
+// Get sends a GET request to the specified URL and returns the response body.
 func (c *APIClient) Get(url string) ([]byte, error) {
-	log.Print("Fetching: ", url)
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
+	defer func() {
+		start := time.Now()
+		elapsed := time.Since(start)
+		log.Printf("Execution time: %s, URL: %s", elapsed, url)
+	}()
+	// Create a channel to communicate the result
+	resultChan := make(chan []byte, 1)
+	errChan := make(chan error, 1)
+
+	go func() {
+		resp, err := c.Client.Get(url)
+		if err != nil {
+			errChan <- err
+			return
+		}
+		defer resp.Body.Close()
+
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			errChan <- err
+			return
+		}
+
+		resultChan <- body
+	}()
+
+	// Wait for the goroutine to finish or return an error
+	select {
+	case body := <-resultChan:
+		return body, nil
+	case err := <-errChan:
 		return nil, err
 	}
-
-	resp, err := c.Client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	return body, nil
 }
 
 type WikiService struct {

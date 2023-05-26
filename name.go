@@ -4,8 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
-	"net/http"
+	"io"
 	"os"
 	"regexp"
 	"strings"
@@ -55,14 +54,9 @@ func (r *JSONNameRepository) GetNames() (AcceptedNames, error) {
 	}
 	defer file.Close()
 
-	data, err := ioutil.ReadAll(file)
-	if err != nil {
-		return AcceptedNames{}, err
-	}
-
 	var names AcceptedNames
-	err = json.Unmarshal(data, &names)
-	if err != nil {
+	err = json.NewDecoder(file).Decode(&names)
+	if err != nil && err != io.EOF {
 		return AcceptedNames{}, err
 	}
 
@@ -76,23 +70,14 @@ type URLNameRepository struct {
 
 // GetNames retrieves the accepted names from a remote URL.
 func (r *URLNameRepository) GetNames() (AcceptedNames, error) {
-	resp, err := http.Get(r.URL)
-	if err != nil {
-		return AcceptedNames{}, err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return AcceptedNames{}, fmt.Errorf("request failed with status code: %d", resp.StatusCode)
-	}
-
-	data, err := ioutil.ReadAll(resp.Body)
+	client := NewAPIClient()
+	body, err := client.Get(r.URL)
 	if err != nil {
 		return AcceptedNames{}, err
 	}
 
 	var names AcceptedNames
-	err = json.Unmarshal(data, &names)
+	err = json.Unmarshal(body, &names)
 	if err != nil {
 		return AcceptedNames{}, err
 	}

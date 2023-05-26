@@ -1,8 +1,8 @@
 package wizlib
 
 import (
+	"bytes"
 	"fmt"
-	"net/http"
 	"net/url"
 	"regexp"
 	"strings"
@@ -33,21 +33,26 @@ type DocumentFetcher interface {
 	Fetch(url string) (*goquery.Document, error)
 }
 
-// HTTPDocumentFetcher fetches HTML documents using HTTP.
-type HTTPDocumentFetcher struct{}
+// HTTPDocumentFetcher provides methods for fetching HTML documents.
+type HTTPDocumentFetcher struct {
+	Client *APIClient
+}
 
+// NewHTTPDocumentFetcher creates a new instance of HTTPDocumentFetcher.
+func NewHTTPDocumentFetcher() *HTTPDocumentFetcher {
+	return &HTTPDocumentFetcher{
+		Client: NewAPIClient(),
+	}
+}
+
+// Fetch fetches the HTML document from the specified URL.
 func (f *HTTPDocumentFetcher) Fetch(url string) (*goquery.Document, error) {
-	resp, err := http.Get(url)
+	body, err := f.Client.Get(url)
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("request failed with status code: %d", resp.StatusCode)
-	}
-
-	doc, err := goquery.NewDocumentFromReader(resp.Body)
+	doc, err := goquery.NewDocumentFromReader(bytes.NewReader(body))
 	if err != nil {
 		return nil, err
 	}

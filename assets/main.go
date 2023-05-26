@@ -13,5 +13,19 @@ func main() {
 		fmt.Println("Failed to fetch wiki text:", err)
 		return
 	}
-	fmt.Println(content)
+
+	fmt.Println("Wiki Text:", content)
+
+	// Fetching player rankings concurrently
+
+	rankingRepo := wizlib.NewRepository(wizlib.NewHTTPDocumentFetcher(), "https://www.wizard101.com/pvp/pvp-rankings?age=4&levels=1-10&filter=storm")
+	rankings, err := rankingRepo.FetchRankings()
+	if err != nil {
+		fmt.Println("Failed to fetch player rankings:", err)
+		return
+	}
+
+	consolePresenter := &wizlib.ConsolePresenter{}
+	consolePresenter.PresentRankings(rankings)
+
 }
