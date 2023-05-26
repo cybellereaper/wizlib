@@ -21,7 +21,7 @@ go get github.com/astridalia/wizlib@v1.0.3
 
 ## Usage
 
-### Wizard101Central/Mediawiki
+### Wizard101Central/Mediawiki Retrieval
 
 ```go
 package main
@@ -66,7 +66,7 @@ func main() {
 }
 ```
 
-### Game Data Retrieval
+### Game Data Retrieval 
 
 ```go
 package main
@@ -77,24 +77,14 @@ import (
 )
 
 func main() {
-	rankingRepo := wizlib.NewRankingRepository("https://www.wizard101.com/pvp/pvp-rankings?age=4&levels=1-10&filter=storm")
-	tournamentRepo := wizlib.NewTournamentRepository("https://www.wizard101.com/pvp/tournament-rankings?age=4&levels=1-10&filter=death")
-
+	rankingRepo := wizlib.NewRepository(wizlib.NewHTTPDocumentFetcher(), "https://www.wizard101.com/pvp/pvp-rankings?age=4&levels=1-10&filter=storm")
 	rankings, err := rankingRepo.FetchRankings()
 	if err != nil {
 		fmt.Println("Failed to fetch player rankings:", err)
 		return
 	}
-
-	tournaments, err := tournamentRepo.FetchTournaments()
-	if err != nil {
-		fmt.Println("Failed to fetch tournaments:", err)
-		return
-	}
-
-	presenter := wizlib.ConsolePresenter{}
-	presenter.PresentRankings(rankings)
-	presenter.PresentTournaments(tournaments)
+	consolePresenter := &wizlib.ConsolePresenter{}
+	consolePresenter.PresentRankings(rankings)
 }
 ```
 
