@@ -100,8 +100,13 @@ func parseRankings(doc *goquery.Document) []PlayerRanking {
 	doc.Find(".schedule table tbody tr").Each(func(i int, s *goquery.Selection) {
 		ranking := PlayerRanking{}
 		ranking.parseFromSelection(s)
-		rankings = append(rankings, ranking)
+		if ranking.Name != "" {
+			rankings = append(rankings, ranking)
+		}
 	})
+
+	// Remove empty values
+	rankings = rankings[:len(rankings)-1]
 	return rankings
 }
 
@@ -113,6 +118,9 @@ func parseTournaments(doc *goquery.Document) []Tournament {
 		tournament.parseFromSelection(s)
 		tournaments = append(tournaments, tournament)
 	})
+
+	// Remove empty values
+	tournaments = tournaments[:len(tournaments)-1]
 	return tournaments
 }
 

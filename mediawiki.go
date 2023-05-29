@@ -74,7 +74,8 @@ func (s *WikiService) ParseToJson(pageID string) ([]byte, error) {
 		return nil, err
 	}
 
-	infobox := ReplaceInfoboxHeader(wiki.Parse.WikiText.Content, FindHeader(wiki.Parse.WikiText.Content))
+	header := FindHeader(wiki.Parse.WikiText.Content)
+	infobox := ReplaceInfoboxHeader(wiki.Parse.WikiText.Content, header)
 	data := ExtractInfoboxData(infobox)
 
 	jsonData, err := json.Marshal(data)
