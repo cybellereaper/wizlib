@@ -1,0 +1,100 @@
+# Compiled Python files
+__pycache__/
+*.py[cod]
+
+# Virtual environment
+venv/
+env/
+*.env
+
+# macOS
+.DS_Store
+
+# Logs and temp files
+*.log
+*.tmp
+
+# IDE-specific files and directories
+.idea/
+.vscode/
+*.pycharm/
+*.sublime-project
+*.sublime-workspace
+
+# Editor backup files
+*~
+*.bak
+
+# Compiled binaries or executables
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Dependency folders
+node_modules/
+bower_components/
+
+# Compiled Python files from Jupyter notebooks
+.ipynb_checkpoints/
+
+# Cached files and directories
+__history/
+.cache/
+
+# Environment-specific files
+*.env
+
+# Package files
+*.egg-info/
+dist/
+build/
+*.egg
+*.whl
+
+# Compiled C extension
+*.pyd
+
+# Local development configuration
+*.env.local
+
+# Project-specific
+settings.ini
+config.ini
+
+# Logs
+logs/
+
+# Ignore secret keys and sensitive information
+secrets.env
+
+# Ignore database files
+*.db
+*.sqlite3
+
+# Ignore compiled assets
+*.css.map
+*.js.map
+*.min.css
+*.min.js
+
+# Ignore compiled font files
+*.eot
+*.svg
+*.ttf
+*.woff
+*.woff2
+
+# Ignore coverage reports
+htmlcov/
+.coverage
+
+# Ignore test data
+test_data/
+
+# Ignore user-specific data
+user_data/
+
+# Ignore temporary build files
+*.tmp
+*.bak
