@@ -2,26 +2,22 @@ package wizlib
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"regexp"
 	"strings"
 )
 
-type WikiText struct {
-	Content string `json:"*"`
-}
-
 type WikiResponse struct {
 	Parse struct {
 		Title    string   `json:"title"`
+		PageId   int64    `json:"pageid"`
 		Images   []string `json:"images"`
-		WikiText WikiText `json:"wikitext"`
+		WikiText string   `json:"wikitext"`
 	} `json:"parse"`
 }
 
 const (
-	apiURL = "https://www.wizard101central.com/wiki/api.php"
+	apiURL = "https://wiki.wizard101central.com/wiki/api.php"
 )
 
 // WikiService provides methods for interacting with the Wizard101 Central Wiki.
@@ -60,9 +56,9 @@ func (s *WikiService) ParseWikiText(body []byte) (*WikiResponse, error) {
 		return nil, err
 	}
 
-	if api.Parse.WikiText.Content == "" {
-		return nil, errors.New("empty WikiText content")
-	}
+	// if api.Parse.WikiText.Content == "" {
+	// 	return nil, errors.New("empty WikiText content")
+	// }
 
 	return &api, nil
 }
@@ -74,8 +70,8 @@ func (s *WikiService) ParseToJson(pageID string) ([]byte, error) {
 		return nil, err
 	}
 
-	header := FindHeader(wiki.Parse.WikiText.Content)
-	infobox := ReplaceInfoboxHeader(wiki.Parse.WikiText.Content, header)
+	header := FindHeader(wiki.Parse.WikiText)
+	infobox := ReplaceInfoboxHeader(wiki.Parse.WikiText, header)
 	data := ExtractInfoboxData(infobox)
 
 	jsonData, err := json.Marshal(data)
