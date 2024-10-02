@@ -16,7 +16,6 @@ go get github.com/astridalia/wizlib
 
 - **Mediawiki**: Get information from the wiki.
 - **Name Generation**: Generate valid wizard names based on an accepted names list.
-- **Game Data Retrieval**: Fetch player rankings and tournament information from the Wizard101 website.
 - **Clean Architecture**: Well-organized codebase following clean architecture principles.
 
 ## Usage
@@ -63,28 +62,6 @@ func main() {
 	}
 
 	fmt.Println("Generated name:", name)
-}
-```
-
-### Game Data Retrieval 
-
-```go
-package main
-
-import (
-	"fmt"
-	"github.com/astridalia/wizlib"
-)
-
-func main() {
-	rankingRepo := wizlib.NewRepository(wizlib.NewHTTPDocumentFetcher(), "https://www.wizard101.com/pvp/pvp-rankings?age=4&levels=1-10&filter=storm")
-	rankings, err := rankingRepo.FetchRankings()
-	if err != nil {
-		fmt.Println("Failed to fetch player rankings:", err)
-		return
-	}
-	consolePresenter := &wizlib.ConsolePresenter{}
-	consolePresenter.PresentRankings(rankings)
 }
 ```
 
