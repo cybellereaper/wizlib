@@ -42,6 +42,10 @@ func (c *Cache) Set(data interface{}, expiry time.Time) {
 	c.expiry = expiry
 }
 
+type DocumentFetcher interface {
+	Fetch(url string) (*goquery.Document, error)
+}
+
 // FetcherCache is a wrapper around DocumentFetcher that adds caching functionality.
 type FetcherCache struct {
 	DocumentFetcher DocumentFetcher

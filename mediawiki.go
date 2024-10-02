@@ -5,108 +5,89 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
+	"sync"
 )
 
 type WikiResponse struct {
 	Parse struct {
-		Title    string   `json:"title"`
-		PageId   int64    `json:"pageid"`
-		Images   []string `json:"images"`
-		WikiText string   `json:"wikitext"`
+		Title   string   `json:"title"`
+		PageID  int64    `json:"pageid"`
+		Images  []string `json:"images"`
+		Content string   `json:"wikitext"`
 	} `json:"parse"`
 }
 
-const (
-	apiURL = "https://wiki.wizard101central.com/wiki/api.php"
-)
+const apiURL = "https://wiki.wizard101central.com/wiki/api.php"
 
-// WikiService provides methods for interacting with the Wizard101 Central Wiki.
 type WikiService struct {
 	Client *APIClient
+	cache  sync.Map
 }
 
-// NewWikiService creates a new instance of WikiService.
-func NewWikiService() *WikiService {
-	return &WikiService{
-		Client: NewAPIClient(),
+func NewWikiService(client *APIClient) *WikiService {
+	return &WikiService{Client: client}
+}
+
+func (s *WikiService) GetWikiText(pageName string) (WikiResponse, error) {
+	url := fmt.Sprintf("%s?action=parse&page=%s&prop=wikitext|images&formatversion=2&format=json", apiURL, pageName)
+
+	// Check cache first
+	if cachedResponse, ok := s.cache.Load(url); ok {
+		return cachedResponse.(WikiResponse), nil
 	}
-}
 
-// GetWikiText returns the WikiText content of the specified page.
-func (s *WikiService) GetWikiText(pageID string) (WikiResponse, error) {
-	url := fmt.Sprintf("%s?action=parse&page=%s&prop=wikitext|images&formatversion=2&format=json", apiURL, pageID)
 	body, err := s.Client.Get(url)
 	if err != nil {
 		return WikiResponse{}, err
 	}
 
-	api, err := s.ParseWikiText(body)
-	if err != nil {
+	var response WikiResponse
+	if err := json.Unmarshal(body, &response); err != nil {
 		return WikiResponse{}, err
 	}
 
-	return *api, nil
+	// Cache the response
+	s.cache.Store(url, response)
+
+	return response, nil
 }
 
-// ParseWikiText parses the response body into a WikiResponse struct.
-func (s *WikiService) ParseWikiText(body []byte) (*WikiResponse, error) {
-	var api WikiResponse
-	err := json.Unmarshal(body, &api)
+func (s *WikiService) ParseToJSON(pageName string) ([]byte, error) {
+	wiki, err := s.GetWikiText(pageName)
 	if err != nil {
 		return nil, err
 	}
 
-	// if api.Parse.WikiText.Content == "" {
-	// 	return nil, errors.New("empty WikiText content")
-	// }
+	infoboxContent := extractInfobox(wiki.Parse.Content)
+	infoboxData := extractInfoboxData(infoboxContent)
 
-	return &api, nil
+	return json.Marshal(infoboxData)
 }
 
-// ParseToJson converts the infobox in the WikiText content to a JSON string.
-func (s *WikiService) ParseToJson(pageID string) ([]byte, error) {
-	wiki, err := s.GetWikiText(pageID)
-	if err != nil {
-		return nil, err
+var (
+	infoboxStartRegex = regexp.MustCompile(`{{[^{]+`)
+	infoboxEndRegex   = regexp.MustCompile(`}}`)
+	infoboxDataRegex  = regexp.MustCompile(`\|([^=]+)=([^|}}]+)`)
+)
+
+func extractInfobox(wikiText string) string {
+	start := infoboxStartRegex.FindStringIndex(wikiText)
+	if start == nil {
+		return ""
 	}
 
-	header := FindHeader(wiki.Parse.WikiText)
-	infobox := ReplaceInfoboxHeader(wiki.Parse.WikiText, header)
-	data := ExtractInfoboxData(infobox)
-
-	jsonData, err := json.Marshal(data)
-	if err != nil {
-		return nil, err
+	end := infoboxEndRegex.FindStringIndex(wikiText[start[1]:])
+	if end == nil {
+		return ""
 	}
 
-	return jsonData, nil
+	return wikiText[start[1] : start[1]+end[0]]
 }
 
-// ReplaceInfoboxHeader removes the infobox header and footer from the WikiText content.
-func ReplaceInfoboxHeader(data, template string) string {
-	data = strings.TrimPrefix(data, fmt.Sprintf("{{%s\n", template))
-	data = strings.TrimSuffix(data, "}}")
-	data = strings.TrimSpace(data)
-	return data
-}
-
-// FindHeader returns the infobox header from the WikiText content.
-func FindHeader(data string) string {
-	header := regexp.MustCompile(`{{(.+?)\n`)
-	headerMatches := header.FindStringSubmatch(data)
-	if len(headerMatches) != 2 {
-		panic("invalid infobox")
-	}
-	return headerMatches[1]
-}
-
-// ExtractInfoboxData extracts key-value pairs from the infobox.
-func ExtractInfoboxData(infobox string) map[string]string {
-	re := regexp.MustCompile(`\|([^=]+)=(.*)`)
-	matches := re.FindAllStringSubmatch(infobox, -1)
-
+func extractInfoboxData(infoboxContent string) map[string]string {
 	data := make(map[string]string)
 
+	matches := infoboxDataRegex.FindAllStringSubmatch(infoboxContent, -1)
 	for _, match := range matches {
 		key := strings.TrimSpace(match[1])
 		value := strings.TrimSpace(match[2])
